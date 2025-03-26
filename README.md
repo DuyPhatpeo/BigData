@@ -264,7 +264,9 @@ tweet_by_hour_sorted.coalesce(1).saveAsTextFile("/mnt/data/tweet_count_by_hour")
 
 # (c) Tìm khung giờ Elon Musk hay đăng tweet nhất
 most_active_hour = tweet_by_hour.max(lambda x: x[1])  # Tìm khung giờ có số tweet nhiều nhất
+print("-------------------------------------------------------------------------------------------------")
 print(f"Khung giờ Elon Musk hay đăng tweet nhất: {most_active_hour[0]}h với {most_active_hour[1]} tweet")
+print("-------------------------------------------------------------------------------------------------")
 
 # Dừng SparkSession
 spark.stop()
