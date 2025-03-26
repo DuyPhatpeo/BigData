@@ -235,28 +235,33 @@ def extract_date(line):
     fields = line.split()
     if len(fields) < 4:
         return None
-    date = fields[1]
+    date = fields[1]  # Giả sử cột ngày là cột thứ 2
     return (date, 1)
 
 tweet_by_date = rdd.map(extract_date).filter(lambda x: x is not None).reduceByKey(lambda a, b: a + b)
 tweet_by_date_sorted = tweet_by_date.sortByKey()  # Sắp xếp theo ngày
-tweet_by_date_str = tweet_by_date_sorted.map(lambda x: f"{x[0]},{x[1]}")  # Định dạng dạng CSV
-tweet_by_date_str.coalesce(1).saveAsTextFile("tweet_count_by_date.txt")  # Xuất ra file 1 tệp
+tweet_by_date_str = tweet_by_date_sorted.map(lambda x: f"{x[0]},{x[1]}")  # Định dạng CSV
+tweet_by_date_str.coalesce(1).saveAsTextFile("tweet_count_by_date")  # Xuất ra file 1 tệp
 
 # (b) Đếm số tweet theo khung giờ
 def extract_hour(line):
     fields = line.split()
     if len(fields) < 4:
         return None
-    time_field = fields[2]
-    hour = time_field.split(":")[0]
+    time_field = fields[2]  # Giả sử cột giờ là cột thứ 3 (định dạng HH:MM:SS)
+    hour = time_field.split(":")[0]  # Lấy giờ (HH)
     return (hour, 1)
 
 tweet_by_hour = rdd.map(extract_hour).filter(lambda x: x is not None).reduceByKey(lambda a, b: a + b)
 tweet_by_hour_sorted = tweet_by_hour.sortByKey()  # Sắp xếp theo giờ
 tweet_by_hour_str = tweet_by_hour_sorted.map(lambda x: f"{x[0]},{x[1]}")  # Định dạng CSV
-tweet_by_hour_str.coalesce(1).saveAsTextFile("tweet_count_by_hour.txt")  # Xuất ra file 1 tệp
+tweet_by_hour_str.coalesce(1).saveAsTextFile("tweet_count_by_hour")  # Xuất ra file 1 tệp
 
+# (c) Tìm khung giờ Elon Musk hay đăng tweet nhất
+most_active_hour = tweet_by_hour.max(lambda x: x[1])  # Tìm khung giờ có số tweet nhiều nhất
+print(f"Khung giờ Elon Musk hay đăng tweet nhất: {most_active_hour[0]}h với {most_active_hour[1]} tweet")
+
+# Dừng SparkSession
 spark.stop()
 
 
