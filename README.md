@@ -222,63 +222,53 @@ Dán nội dung sau vào file (chỉnh sửa đường dẫn file nếu cần: n
 
 ```bash
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import substring, col
 
 # Khởi tạo SparkSession
 spark = SparkSession.builder.appName("TweetAnalysis").getOrCreate()
+sc = spark.sparkContext
 
-# Đường dẫn file dữ liệu (CSV với header)
-file_path = "file:///home/phat/Downloads/tweet/ElonMusk_tweets.csv"
+# Đọc file dữ liệu
+rdd = sc.textFile("file:///home/phat/Downloads/ElonMusk_tweets.csv")
 
-# Đọc file CSV với header (giả sử các cột: id, date, time, tweet,...)
-df = spark.read.option("header", "true").csv(file_path)
+# (a) Đếm số tweet theo ngày
+def extract_date(line):
+    fields = line.split()
+    if len(fields) < 4:
+        return None
+    date = fields[1]
+    return (date, 1)
 
-# ---------------------------------------------------
-# (a) Đếm số tweets của từng ngày
-# ---------------------------------------------------
-tweet_count_by_date = df.groupBy("date").count().orderBy("date")
+tweet_by_date = rdd.map(extract_date).filter(lambda x: x is not None).reduceByKey(lambda a, b: a + b)
+tweet_by_date_sorted = tweet_by_date.sortByKey()
+tweet_by_date_str = tweet_by_date_sorted.map(lambda x: f"{x[0]},{x[1]}")
+tweet_by_date_str.coalesce(1).saveAsTextFile("tweet_count_by_date.txt")
 
-# Chuyển kết quả về dạng pandas để ghi file text
-tweet_count_by_date_pd = tweet_count_by_date.toPandas()
+# (b) Đếm số tweet theo khung giờ
+def extract_hour(line):
+    fields = line.split()
+    if len(fields) < 4:
+        return None
+    time_field = fields[2]
+    hour = time_field.split(":")[0]
+    return (hour, 1)
 
-# Lưu kết quả vào file tweet_count_by_date.txt
-with open("tweet_count_by_date.txt", "w", encoding="utf-8") as f:
-    f.write("Đếm số tweets của từng ngày:\n")
-    for row in tweet_count_by_date_pd.itertuples(index=False):
-        f.write(f"{row.date}\t{row.count}\n")
+tweet_by_hour = rdd.map(extract_hour).filter(lambda x: x is not None).reduceByKey(lambda a, b: a + b)
+tweet_by_hour_sorted = tweet_by_hour.sortByKey()
+tweet_by_hour_str = tweet_by_hour_sorted.map(lambda x: f"{x[0]},{x[1]}")
+tweet_by_hour_str.coalesce(1).saveAsTextFile("tweet_count_by_hour.txt")
 
-# ---------------------------------------------------
-# (b) Đếm số tweets theo từng khung giờ
-# ---------------------------------------------------
-# Giả sử cột "time" có định dạng HH:MM:SS, sử dụng substring để trích xuất giờ (2 ký tự đầu)
-df_with_hour = df.withColumn("hour", substring("time", 1, 2))
-tweet_count_by_hour = df_with_hour.groupBy("hour").count().orderBy(col("hour").cast("int"))
+# 📌 Tìm khung giờ Elon Musk hay tweet nhất
+most_active_hour = tweet_by_hour.max(lambda x: x[1])  # Tìm giờ có nhiều tweet nhất
+most_active_hour_str = f"Elon Musk thường đăng tweet vào khung giờ: {most_active_hour[0]} với {most_active_hour[1]} tweet.\n"
 
-# Chuyển kết quả về dạng pandas để ghi file text
-tweet_count_by_hour_pd = tweet_count_by_hour.toPandas()
+# Ghi kết quả ra file
+with open("most_active_hour.txt", "w") as f:
+    f.write(most_active_hour_str)
 
-# Tìm khung giờ có số tweet nhiều nhất
-max_row = tweet_count_by_hour.orderBy(col("count").desc()).first()
-if max_row:
-    max_hour = max_row["hour"]
-    max_count = max_row["count"]
-    answer_line = f"Elon Musk thường đăng tweet vào khung giờ: {max_hour}:00 - {max_hour}:59 (với {max_count} tweet)."
-else:
-    answer_line = "Không tìm thấy dữ liệu tweet theo giờ."
+print(most_active_hour_str)  # In ra terminal
 
-# Lưu kết quả vào file tweet_count_by_hour.txt
-with open("tweet_count_by_hour.txt", "w", encoding="utf-8") as f:
-    f.write("Trả lời: " + answer_line + "\n\n")
-    f.write("Đếm số tweets theo từng khung giờ:\n")
-    for row in tweet_count_by_hour_pd.itertuples(index=False):
-        f.write(f"{row.hour}:00\t{row.count}\n")
-
-# Dừng Spark
 spark.stop()
 
-print("Đã lưu kết quả vào các file:")
-print("  - tweet_count_by_date.txt")
-print("  - tweet_count_by_hour.txt")
 
 ```
 
