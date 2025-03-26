@@ -209,6 +209,10 @@ Xem kết quả:
 hdfs dfs -cat /user/hdoop/data/tweet_count_by_hour/part-\*
 ```
 
+```bash
+stop-all.sh
+```
+
 Phần II: Apache Spark và Trực Quan Hóa Dữ Liệu
 
 1. Tạo file Spark Job với Biểu Đồ: tweet_analysis.py
