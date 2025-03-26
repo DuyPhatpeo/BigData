@@ -159,6 +159,10 @@ chmod +x mapper_date.py reducer_date.py mapper_hour.py reducer_hour.py
    Khởi động hdoop
 
    ```bash
+   su - hdoop
+   ```
+
+   ```bash
    start-all.sh
    ```
 
