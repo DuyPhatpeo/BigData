@@ -228,46 +228,49 @@ spark = SparkSession.builder.appName("TweetAnalysis").getOrCreate()
 sc = spark.sparkContext
 
 # Đọc file dữ liệu
-rdd = sc.textFile("file:///home/phat/Downloads/ElonMusk_tweets.csv")
+rdd = sc.textFile("file:///mnt/data/ElonMusk_tweets.csv")
 
 # Bỏ dòng tiêu đề
 header = rdd.first()
 rdd = rdd.filter(lambda line: line != header)
 
-# (a) Đếm số tweets theo ngày
+# (a) Đếm số tweet theo ngày
 def extract_date(line):
-    fields = line.split(",")  # Chia tách theo dấu phẩy
+    fields = line.split(",")
     if len(fields) < 2:
         return None
-    datetime_field = fields[1].strip()  # Cột 'created_at' (YYYY-MM-DD HH:MM:SS)
-    date = datetime_field.split(" ")[0]  # Lấy phần ngày YYYY-MM-DD
+    date = fields[1].split(" ")[0]  # Lấy phần YYYY-MM-DD
     return (date, 1)
 
 tweet_by_date = rdd.map(extract_date).filter(lambda x: x is not None).reduceByKey(lambda a, b: a + b)
-tweet_by_date_sorted = tweet_by_date.sortByKey()  # Sắp xếp theo ngày
-tweet_by_date_sorted.coalesce(1).saveAsTextFile("/mnt/data/tweet_count_by_date")  # Xuất ra file
+tweet_by_date_sorted = tweet_by_date.sortByKey()
+tweet_by_date_sorted.coalesce(1).saveAsTextFile("tweet_count_by_date")
 
-# (b) Đếm số tweets theo khung giờ
+# In ra 10 dòng đầu tiên
+tweet_by_date_sorted.take(5)
+
+# (b) Đếm số tweet theo khung giờ
 def extract_hour(line):
-    fields = line.split(",")  # Chia tách theo dấu phẩy
+    fields = line.split(",")
     if len(fields) < 2:
         return None
-    datetime_field = fields[1].strip()  # Cột 'created_at' (YYYY-MM-DD HH:MM:SS)
-    if " " not in datetime_field:
-        return None
-    hour = datetime_field.split(" ")[1].split(":")[0]  # Lấy phần giờ HH
+    hour = fields[1].split(" ")[1].split(":")[0]  # Lấy giờ (HH)
     return (hour, 1)
 
 tweet_by_hour = rdd.map(extract_hour).filter(lambda x: x is not None).reduceByKey(lambda a, b: a + b)
-tweet_by_hour_sorted = tweet_by_hour.sortByKey()  # Sắp xếp theo giờ
-tweet_by_hour_sorted.coalesce(1).saveAsTextFile("/mnt/data/tweet_count_by_hour")  # Xuất ra file
+tweet_by_hour_sorted = tweet_by_hour.sortByKey()
+tweet_by_hour_sorted.coalesce(1).saveAsTextFile("tweet_count_by_hour")
+
+# In ra 10 dòng đầu tiên
+tweet_by_hour_sorted.take(5)
 
 # (c) Tìm khung giờ Elon Musk hay đăng tweet nhất
-most_active_hour = tweet_by_hour.max(lambda x: x[1])  # Tìm khung giờ có số tweet nhiều nhất
+most_active_hour = tweet_by_hour.max(lambda x: x[1])
 print(f"Khung giờ Elon Musk hay đăng tweet nhất: {most_active_hour[0]}h với {most_active_hour[1]} tweet")
 
 # Dừng SparkSession
 spark.stop()
+
 
 
 ```
