@@ -237,33 +237,32 @@ file_path = "file:///home/phat/Downloads/tweet/ElonMusk_tweets.csv"
 # Đọc file dữ liệu
 rdd = sc.textFile(file_path)
 
-# -------------------------------
+# ---------------------------------------------------
 # (a) Đếm số tweets của từng ngày
-# -------------------------------
+# ---------------------------------------------------
 def extract_date(line):
     fields = line.split()
     # Kiểm tra dữ liệu có ít nhất 4 trường: id, date, time, text
     if len(fields) < 4:
         return None
-    return (fields[1], 1)  # (date, 1)
+    return (fields[1], 1)  # Sử dụng trường thứ 2 làm ngày
 
 tweet_by_date = (
     rdd.map(extract_date)
        .filter(lambda x: x is not None)
        .reduceByKey(lambda a, b: a + b)
 )
-
 results_date = tweet_by_date.collect()
 
-# Lưu kết quả đếm theo ngày ra file txt
+# Lưu kết quả đếm theo ngày ra file tweet_count_by_date.txt
 with open("tweet_count_by_date.txt", "w", encoding="utf-8") as f:
     f.write("Đếm số tweets của từng ngày:\n")
     for date, count in sorted(results_date):
         f.write(f"{date}\t{count}\n")
 
-# -------------------------------
+# ---------------------------------------------------
 # (b) Đếm số tweets theo từng khung giờ
-# -------------------------------
+# ---------------------------------------------------
 def extract_hour(line):
     fields = line.split()
     if len(fields) < 4:
@@ -277,41 +276,32 @@ tweet_by_hour = (
        .filter(lambda x: x is not None)
        .reduceByKey(lambda a, b: a + b)
 )
-
 results_hour = tweet_by_hour.collect()
 
-# Lưu kết quả đếm theo khung giờ ra file txt
+# Tìm khung giờ có số tweet nhiều nhất
+if results_hour:
+    max_hour, max_count = max(results_hour, key=lambda x: x[1])
+    max_hour_int = int(max_hour)
+    start_time = f"{max_hour_int:02d}:00"
+    end_time = f"{max_hour_int:02d}:59"
+    answer = f"Elon Musk thường đăng tweet vào khung giờ: {start_time} - {end_time} (với {max_count} tweet)."
+else:
+    answer = "Không tìm thấy dữ liệu tweet theo giờ."
+
+# Lưu kết quả đếm theo khung giờ vào file tweet_count_by_hour.txt,
+# ghi kết quả trả lời vào dòng đầu tiên
 with open("tweet_count_by_hour.txt", "w", encoding="utf-8") as f:
+    f.write("Trả lời: " + answer + "\n\n")
     f.write("Đếm số tweets theo từng khung giờ:\n")
     for hour, count in sorted(results_hour, key=lambda x: int(x[0])):
         f.write(f"{int(hour):02d}:00\t{count}\n")
 
-# ------------------------------------------
-# Tìm khung giờ có số tweet nhiều nhất
-# ------------------------------------------
-if results_hour:
-    max_hour, max_count = max(results_hour, key=lambda x: x[1])
-    # Định dạng: hh:mm - hh:mm, ví dụ: 08:00 - 08:59
-    max_hour_int = int(max_hour)
-    start_time = f"{max_hour_int:02d}:00"
-    end_time = f"{max_hour_int:02d}:59"
-    answer = (f"Elon Musk thường đăng tweet vào khung giờ: {start_time} - {end_time} "
-              f"(với {max_count} tweet).")
-else:
-    answer = "Không tìm thấy dữ liệu tweet theo giờ."
-
-# Lưu kết quả trả lời ra file answer.txt
-with open("tweet_hour_answer.txt", "w", encoding="utf-8") as f:
-    f.write(answer + "\n")
-
 # Dừng Spark
 spark.stop()
 
-# In kết quả ra console
 print("Đã lưu kết quả vào các file:")
 print("  - tweet_count_by_date.txt")
 print("  - tweet_count_by_hour.txt")
-print("  - tweet_hour_answer.txt")
 
 ```
 
