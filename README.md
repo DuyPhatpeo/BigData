@@ -29,7 +29,6 @@ nano mapper_date.py
 Sau đó, dán nội dung sau:
 
 ```bash
-#!/usr/bin/env python3
 import sys
 
 for line in sys.stdin:
@@ -56,7 +55,6 @@ nano reducer_date.py
 Dán nội dung sau:
 
 ```bash
-#!/usr/bin/env python3
 import sys
 
 current_date = None
@@ -93,7 +91,6 @@ nano mapper_hour.py
 Dán nội dung sau:
 
 ```bash
-#!/usr/bin/env python3
 import sys
 
 for line in sys.stdin:
@@ -120,7 +117,6 @@ nano reducer_hour.py
 Dán nội dung sau:
 
 ```bash
-#!/usr/bin/env python3
 import sys
 
 current_hour = None
