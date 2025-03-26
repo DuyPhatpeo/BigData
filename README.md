@@ -155,10 +155,13 @@ chmod +x mapper_date.py reducer_date.py mapper_hour.py reducer_hour.py
 ```
 
 2. Upload dữ liệu lên HDFS
+
    Khởi động hdoop
+
    ```bash
    start-all.sh
    ```
+
    Giả sử file ElonMusk_tweets.csv nằm tại /home/phat/Downloads/ElonMusk_tweets.csv. Upload file lên HDFS với tài khoản hdoop bằng lệnh:
 
 ```bash
