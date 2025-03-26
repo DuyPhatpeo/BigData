@@ -230,78 +230,71 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # Khởi tạo SparkSession
-
 spark = SparkSession.builder.appName("TweetAnalysis").getOrCreate()
 sc = spark.sparkContext
 
-# Đọc file dữ liệu.
-
-# Nếu dữ liệu ở local:
-
+# Đọc file dữ liệu từ local
 rdd = sc.textFile("file:///home/phat/Downloads/ElonMusk_tweets.csv")
 
-# Nếu dữ liệu đã upload lên HDFS, dùng:
-
-# rdd = sc.textFile("hdfs://localhost:9000/user/hdoop/data/ElonMusk_tweets.csv")
-
 # (a) Đếm số tweet theo ngày
-
 def extract_date(line):
-fields = line.split()
-if len(fields) < 4:
-return None
-return (fields[1], 1) # (date, 1)
+    fields = line.split()
+    if len(fields) < 4:
+        return None
+    return (fields[1], 1)  # (date, 1)
 
-tweet_by_date = rdd.map(extract_date) \
- .filter(lambda x: x is not None) \
- .reduceByKey(lambda a, b: a + b)
+tweet_by_date = (
+    rdd.map(extract_date)
+    .filter(lambda x: x is not None)
+    .reduceByKey(lambda a, b: a + b)
+)
 
 # Thu thập kết quả và chuyển sang DataFrame
-
 data_date = tweet_by_date.collect()
-df_date = pd.DataFrame(data_date, columns=['Date', 'Count'])
-df_date.sort_values('Date', inplace=True)
+df_date = pd.DataFrame(data_date, columns=["Date", "Count"])
+df_date.sort_values("Date", inplace=True)
 
 # Vẽ biểu đồ số tweet theo ngày
-
 plt.figure(figsize=(10, 5))
-plt.bar(df_date['Date'], df_date['Count'], color='skyblue')
-plt.title('Số Tweet theo Ngày')
-plt.xlabel('Ngày')
-plt.ylabel('Số Tweet')
+plt.bar(df_date["Date"], df_date["Count"], color="skyblue")
+plt.title("Số Tweet theo Ngày")
+plt.xlabel("Ngày")
+plt.ylabel("Số Tweet")
 plt.xticks(rotation=45)
 plt.tight_layout()
-plt.savefig("tweet_count_by_date.png") # Lưu biểu đồ dưới dạng file ảnh
+plt.savefig("tweet_count_by_date.png")  # Lưu biểu đồ dưới dạng file ảnh
 plt.show()
 
 # (b) Đếm số tweet theo khung giờ
-
 def extract_hour(line):
-fields = line.split()
-if len(fields) < 4:
-return None
-hour = fields[2].split(":")[0]
-return (hour, 1)
+    fields = line.split()
+    if len(fields) < 4:
+        return None
+    hour = fields[2].split(":")[0]
+    return (hour, 1)
 
-tweet_by_hour = rdd.map(extract_hour) \
- .filter(lambda x: x is not None) \
- .reduceByKey(lambda a, b: a + b)
+tweet_by_hour = (
+    rdd.map(extract_hour)
+    .filter(lambda x: x is not None)
+    .reduceByKey(lambda a, b: a + b)
+)
+
 data_hour = tweet_by_hour.collect()
-df_hour = pd.DataFrame(data_hour, columns=['Hour', 'Count'])
-df_hour.sort_values('Hour', inplace=True)
+df_hour = pd.DataFrame(data_hour, columns=["Hour", "Count"])
+df_hour.sort_values("Hour", inplace=True)
 
 # Vẽ biểu đồ số tweet theo khung giờ
-
 plt.figure(figsize=(8, 5))
-plt.bar(df_hour['Hour'], df_hour['Count'], color='salmon')
-plt.title('Số Tweet theo Khung giờ')
-plt.xlabel('Giờ')
-plt.ylabel('Số Tweet')
+plt.bar(df_hour["Hour"], df_hour["Count"], color="salmon")
+plt.title("Số Tweet theo Khung giờ")
+plt.xlabel("Giờ")
+plt.ylabel("Số Tweet")
 plt.xticks(rotation=0)
 plt.tight_layout()
-plt.savefig("tweet_count_by_hour.png") # Lưu biểu đồ
+plt.savefig("tweet_count_by_hour.png")  # Lưu biểu đồ
 plt.show()
 
+# Dừng Spark
 spark.stop()
 ```
 
