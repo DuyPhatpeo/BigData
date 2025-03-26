@@ -222,51 +222,71 @@ Dán nội dung sau vào file (chỉnh sửa đường dẫn file nếu cần: n
 
 ```bash
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, count, hour, to_timestamp, concat_ws, max as spark_max
 
-# Khởi tạo SparkSession
-spark = SparkSession.builder.appName("TweetAnalysis").getOrCreate()
-sc = spark.sparkContext
+# Tạo SparkSession
+spark = SparkSession.builder.appName("ElonMuskTweetAnalysis").getOrCreate()
 
-# Đọc file dữ liệu
-rdd = sc.textFile("file:///home/phat/Downloads/ElonMusk_tweets.csv")
+# Đọc file CSV với header từ đường dẫn
+df = spark.read.csv(
+    "file:///home/phat/Downloads/tweet/ElonMusk_tweets.csv",
+    header=True,
+    inferSchema=True
+)
 
-# (a) Đếm số tweet theo ngày
-def extract_date(line):
-    fields = line.split()
-    if len(fields) < 4:
-        return None
-    date = fields[1]
-    return (date, 1)
+# Kiểm tra schema
+df.printSchema()
 
-tweet_by_date = rdd.map(extract_date).filter(lambda x: x is not None).reduceByKey(lambda a, b: a + b)
-tweet_by_date_sorted = tweet_by_date.sortByKey()
-tweet_by_date_str = tweet_by_date_sorted.map(lambda x: f"{x[0]},{x[1]}")
-tweet_by_date_str.coalesce(1).saveAsTextFile("tweet_count_by_date.txt")
+# ----------------------------------------------------------
+# (a) Đếm số tweets theo ngày
+# ----------------------------------------------------------
+tweets_by_date = df.groupBy("date").agg(count("*").alias("tweet_count"))
+tweets_by_date_sorted = tweets_by_date.orderBy(col("date"))
 
-# (b) Đếm số tweet theo khung giờ
-def extract_hour(line):
-    fields = line.split()
-    if len(fields) < 4:
-        return None
-    time_field = fields[2]
-    hour = time_field.split(":")[0]
-    return (hour, 1)
+print("=== Số lượng tweet theo ngày ===")
+tweets_by_date_sorted.show()
 
-tweet_by_hour = rdd.map(extract_hour).filter(lambda x: x is not None).reduceByKey(lambda a, b: a + b)
-tweet_by_hour_sorted = tweet_by_hour.sortByKey()
-tweet_by_hour_str = tweet_by_hour_sorted.map(lambda x: f"{x[0]},{x[1]}")
-tweet_by_hour_str.coalesce(1).saveAsTextFile("tweet_count_by_hour.txt")
+# Lưu kết quả ra CSV (gộp thành 1 file duy nhất)
+tweets_by_date_sorted.coalesce(1).write.csv("tweet_count_by_date_single", header=True)
 
-# 📌 Tìm khung giờ Elon Musk hay tweet nhất
-most_active_hour = tweet_by_hour.max(lambda x: x[1])  # Tìm giờ có nhiều tweet nhất
-most_active_hour_str = f"Elon Musk thường đăng tweet vào khung giờ: {most_active_hour[0]} với {most_active_hour[1]} tweet.\n"
+# ----------------------------------------------------------
+# (b) Đếm số tweets theo khung giờ
+# ----------------------------------------------------------
+# Tạo cột timestamp từ 'date' và 'time'
+df_with_ts = df.withColumn(
+    "timestamp",
+    to_timestamp(concat_ws(" ", col("date"), col("time")), "yyyy-MM-dd HH:mm:ss")
+)
 
-# Ghi kết quả ra file
-with open("most_active_hour.txt", "w") as f:
-    f.write(most_active_hour_str)
+# Tạo cột 'hour' từ timestamp
+df_with_hour = df_with_ts.withColumn("hour", hour(col("timestamp")))
 
-print(most_active_hour_str)  # In ra terminal
+# Đếm tweet theo 'hour'
+tweets_by_hour = df_with_hour.groupBy("hour").agg(count("*").alias("tweet_count"))
+tweets_by_hour_sorted = tweets_by_hour.orderBy(col("hour"))
 
+print("=== Số lượng tweet theo từng khung giờ (0-23) ===")
+tweets_by_hour_sorted.show()
+
+# Tìm giá trị tweet_count lớn nhất để đánh dấu khung giờ tweet nhiều nhất
+max_count_val = tweets_by_hour_sorted.agg(spark_max("tweet_count")).first()[0]
+
+# Thêm cột 'most_active': True nếu tweet_count == max_count_val, ngược lại False
+tweets_by_hour_flagged = tweets_by_hour_sorted.withColumn("most_active", col("tweet_count") == max_count_val)
+
+# Lưu kết quả ra CSV (gộp thành 1 file duy nhất)
+tweets_by_hour_flagged.coalesce(1).write.csv("tweet_count_by_hour_single", header=True)
+
+# In ra khung giờ có số tweet nhiều nhất
+most_active = tweets_by_hour_flagged.filter(col("most_active") == True).collect()
+if most_active:
+    most_active = most_active[0]
+    print(f"Elon Musk thường đăng nhiều tweet nhất vào khung giờ {most_active['hour']}h "
+          f"với {most_active['tweet_count']} tweet.")
+else:
+    print("Không tìm thấy khung giờ có tweet nhiều nhất.")
+
+# Dừng SparkSession
 spark.stop()
 
 
