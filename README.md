@@ -157,59 +157,59 @@ chmod +x mapper_date.py reducer_date.py mapper_hour.py reducer_hour.py
 2. Upload dữ liệu lên HDFS
    Giả sử file ElonMusk_tweets.csv nằm tại /home/phat/Downloads/ElonMusk_tweets.csv. Upload file lên HDFS với tài khoản hdoop bằng lệnh:
 
-bash
-Sao chép
-Chỉnh sửa
+```bash
 hdfs dfs -mkdir -p /user/hdoop/data
-hdfs dfs -copyFromLocal /home/phat/Downloads/ElonMusk_tweets.csv /user/hdoop/data 3. Chạy các job MapReduce
+hdfs dfs -copyFromLocal /home/phat/Downloads/ElonMusk_tweets.csv /user/hdoop/data
+```
+
+3. Chạy các job MapReduce
+
 3.1 Đếm số tweet theo ngày
 Chạy job MapReduce với lệnh:
 
-bash
-Sao chép
-Chỉnh sửa
+```bash
 hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-\*.jar \
  -input /user/hdoop/data/ElonMusk_tweets.csv \
  -output /user/hdoop/data/tweet_count_by_date \
  -mapper mapper_date.py \
  -reducer reducer_date.py
+```
+
 Sau khi job hoàn tất, xem kết quả:
 
-bash
-Sao chép
-Chỉnh sửa
+```bash
 hdfs dfs -cat /user/hdoop/data/tweet_count_by_date/part-\*
+```
+
 3.2 Đếm số tweet theo khung giờ
 Chạy job MapReduce với lệnh:
 
-bash
-Sao chép
-Chỉnh sửa
+```bash
 hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-\*.jar \
  -input /user/hdoop/data/ElonMusk_tweets.csv \
  -output /user/hdoop/data/tweet_count_by_hour \
  -mapper mapper_hour.py \
  -reducer reducer_hour.py
+```
+
 Xem kết quả:
 
-bash
-Sao chép
-Chỉnh sửa
+```bash
 hdfs dfs -cat /user/hdoop/data/tweet_count_by_hour/part-\*
+```
+
 Phần II: Apache Spark và Trực Quan Hóa Dữ Liệu
 
 1. Tạo file Spark Job với Biểu Đồ: tweet_analysis.py
    Mở terminal:
 
-bash
-Sao chép
-Chỉnh sửa
+```bash
 nano tweet_analysis.py
+```
+
 Dán nội dung sau vào file (chỉnh sửa đường dẫn file nếu cần: nếu dữ liệu đang ở local hoặc trên HDFS):
 
-python
-Sao chép
-Chỉnh sửa
+```bash
 from pyspark.sql import SparkSession
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -288,23 +288,23 @@ plt.savefig("tweet_count_by_hour.png") # Lưu biểu đồ
 plt.show()
 
 spark.stop()
+```
+
 Lưu file (Ctrl+X, Y, Enter).
 
 2. Cài đặt thư viện (nếu chưa có)
    Cài đặt các thư viện cần thiết bằng pip:
 
-bash
-Sao chép
-Chỉnh sửa
-pip3 install matplotlib pandas 3. Chạy Spark Job
+```bash
+pip3 install matplotlib pandas
+```
+
+3. Chạy Spark Job
+
 Trong terminal, chạy lệnh:
 
-bash
-Sao chép
-Chỉnh sửa
+```bash
 spark-submit tweet_analysis.py
+```
+
 Kết quả sẽ được trực quan hóa bằng biểu đồ và các file ảnh tweet_count_by_date.png và tweet_count_by_hour.png sẽ được lưu trong thư mục làm việc.
-
-```
-
-```
