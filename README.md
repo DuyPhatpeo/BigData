@@ -232,7 +232,7 @@ spark = SparkSession.builder.appName("TweetAnalysisSimple").getOrCreate()
 sc = spark.sparkContext
 
 # Đường dẫn file dữ liệu (local)
-file_path = "file:///home/phat/Downloads/ElonMusk_tweets.csv"
+file_path = "file:///home/phat/Downloads/tweet/ElonMusk_tweets.csv"
 
 # Đọc file dữ liệu
 rdd = sc.textFile(file_path)
@@ -253,9 +253,10 @@ tweet_by_date = (
 
 results_date = tweet_by_date.collect()
 
-print("=== Số Tweet theo Ngày ===")
-for date, count in sorted(results_date):
-    print(f"Ngày: {date}, Số tweet: {count}")
+# Lưu kết quả đếm theo ngày ra file txt
+with open("tweet_count_by_date.txt", "w", encoding="utf-8") as f:
+    for date, count in sorted(results_date):
+        f.write(f"{date}\t{count}\n")
 
 # (b) Đếm số tweet theo khung giờ
 def extract_hour(line):
@@ -274,12 +275,16 @@ tweet_by_hour = (
 
 results_hour = tweet_by_hour.collect()
 
-print("\n=== Số Tweet theo Khung giờ ===")
-for hour, count in sorted(results_hour):
-    print(f"Giờ: {hour}, Số tweet: {count}")
+# Lưu kết quả đếm theo khung giờ ra file txt
+with open("tweet_count_by_hour.txt", "w", encoding="utf-8") as f:
+    for hour, count in sorted(results_hour):
+        f.write(f"{hour}\t{count}\n")
 
 # Dừng Spark
 spark.stop()
+
+print("Đã lưu kết quả vào các file:\n  - tweet_count_by_date.txt\n  - tweet_count_by_hour.txt")
+
 ```
 
 Lưu file (Ctrl+X, Y, Enter).
