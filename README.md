@@ -278,12 +278,14 @@ results_hour = tweet_by_hour.collect()
 # Lưu kết quả đếm theo khung giờ ra file txt
 with open("tweet_count_by_hour.txt", "w", encoding="utf-8") as f:
     for hour, count in sorted(results_hour):
-        f.write(f"{hour}\t{count}\n")
+        f.write(f"{int(hour):02d}:00\t{count}\n")
 
 # Tìm khung giờ có số tweet nhiều nhất
 if results_hour:
     max_hour, max_count = max(results_hour, key=lambda x: x[1])
-    answer = f"Elon Musk thường đăng tweet vào khung giờ: {max_hour}:00 - {max_hour}:59 (với {max_count} tweet)"
+    # Định dạng giờ dưới dạng hh:mm (ví dụ: 08:00)
+    max_hour_formatted = f"{int(max_hour):02d}:00"
+    answer = f"Elon Musk thường đăng tweet vào khung giờ: {max_hour_formatted} - {max_hour_formatted[:-2]}59 (với {max_count} tweet)"
 else:
     answer = "Không tìm thấy dữ liệu tweet theo giờ."
 
