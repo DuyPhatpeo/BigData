@@ -238,7 +238,7 @@ df = spark.read.csv(
 df.printSchema()
 
 # ----------------------------------------------------------
-# (a) Đếm số tweets theo ngày
+# (a) Đếm số tweet theo ngày
 # ----------------------------------------------------------
 tweets_by_date = df.groupBy("date").agg(count("*").alias("tweet_count"))
 tweets_by_date_sorted = tweets_by_date.orderBy(col("date"))
@@ -250,7 +250,7 @@ tweets_by_date_sorted.show()
 tweets_by_date_sorted.coalesce(1).write.csv("tweet_count_by_date_single", header=True)
 
 # ----------------------------------------------------------
-# (b) Đếm số tweets theo khung giờ
+# (b) Đếm số tweet theo khung giờ
 # ----------------------------------------------------------
 # Tạo cột timestamp từ 'date' và 'time'
 df_with_ts = df.withColumn(
@@ -268,7 +268,7 @@ tweets_by_hour_sorted = tweets_by_hour.orderBy(col("hour"))
 print("=== Số lượng tweet theo từng khung giờ (0-23) ===")
 tweets_by_hour_sorted.show()
 
-# Tìm giá trị tweet_count lớn nhất để đánh dấu khung giờ tweet nhiều nhất
+# Tìm giá trị tweet_count lớn nhất (số tweet nhiều nhất trong 1 khung giờ)
 max_count_val = tweets_by_hour_sorted.agg(spark_max("tweet_count")).first()[0]
 
 # Thêm cột 'most_active': True nếu tweet_count == max_count_val, ngược lại False
