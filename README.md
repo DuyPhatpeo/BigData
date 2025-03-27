@@ -16,39 +16,44 @@ File này hướng dẫn các bước sau:
 
 ## Phần I: Hadoop MapReduce
 
-### 1. Tạo các file Python cho MapReduce
+0. Đăng nhập tài khoản hdoop
+   Trước khi tạo file và thực hiện các bước khác, hãy đăng nhập vào tài khoản hdoop. Mở terminal và chạy lệnh:
 
-#### 1.1 Tạo file `mapper_date.py`
+```bash
+su - hdoop
+```
 
-Mở terminal và nhập:
+1. Tạo các file Python cho MapReduce
+   Sau khi đã đăng nhập tài khoản hdoop, bạn tiến hành tạo các file như sau:
+
+1.1. Tạo file mapper_date.py
+Mở terminal và nhập lệnh:
 
 ```bash
 nano mapper_date.py
 ```
 
-Sau đó, dán nội dung sau:
+Dán nội dung sau:
 
 ```bash
 import sys
 
 for line in sys.stdin:
-    line = line.strip()
-    if not line:
-        continue
-    fields = line.split()
-    # Dữ liệu có ít nhất 4 trường: id, date, time, text
-    if len(fields) < 4:
-        continue
-    date = fields[1]  # Trường thứ 2 là ngày
-    print(f"{date}\t1")
+line = line.strip()
+if not line:
+continue
+fields = line.split() # Dữ liệu có ít nhất 4 trường: id, date, time, text
+if len(fields) < 4:
+continue
+date = fields[1] # Trường thứ 2 là ngày
+print(f"{date}\t1")
+Lưu file bằng cách nhấn Ctrl+X, sau đó nhấn Y rồi Enter.
 ```
 
-Lưu file bằng cách nhấn Ctrl+X, sau đó Y và Enter.
-
-1.2 Tạo file reducer_date.py
-Mở terminal:
+1.2. Tạo file reducer_date.py
 
 ```bash
+
 nano reducer_date.py
 ```
 
@@ -61,11 +66,11 @@ current_date = None
 count = 0
 
 for line in sys.stdin:
-    line = line.strip()
-    if not line:
-        continue
-    date, value = line.split("\t")
-    value = int(value)
+line = line.strip()
+if not line:
+continue
+date, value = line.split("\t")
+value = int(value)
 
     if current_date == date:
         count += value
@@ -76,19 +81,19 @@ for line in sys.stdin:
         count = value
 
 if current_date is not None:
-    print(f"{current_date}\t{count}")
+print(f"{current_date}\t{count}")
 ```
 
 Lưu file.
 
-1.3 Tạo file mapper_hour.py
+1.3. Tạo file mapper_hour.py
 Mở terminal:
 
 ```bash
 nano mapper_hour.py
 ```
 
-Dán nội dung sau:
+Dán nội dung sau (chú ý indent đúng):
 
 ```bash
 import sys
@@ -107,14 +112,14 @@ print(f"{hour}\t1")
 
 Lưu file.
 
-1.4 Tạo file reducer_hour.py
+1.4. Tạo file reducer_hour.py
 Mở terminal:
 
 ```bash
 nano reducer_hour.py
 ```
 
-Dán nội dung sau:
+Dán nội dung sau (chú ý indent đúng):
 
 ```bash
 import sys
@@ -143,35 +148,27 @@ print(f"{current_hour}:00 - {current_hour}:59\t{count}")
 
 Lưu file.
 
-1.5 Cấp quyền thực thi cho các file
-Trong terminal, chạy lệnh:
+1.5. Cấp quyền thực thi cho các file
+Chạy lệnh sau để cấp quyền thực thi:
 
 ```bash
-chmod +x mapper_date.py reducer_date.py mapper_hour.py reducer_hour.py
+chmod +x mapper_date.py reducer_date.py mapper_hour.py reducer_hour.py 2. Upload dữ liệu lên HDFS
 ```
 
-2. Upload dữ liệu lên HDFS
-
-   Khởi động hdoop
-
-   ```bash
-   su - hdoop
-   ```
-
-   ```bash
-   start-all.sh
-   ```
-
-   Giả sử file ElonMusk_tweets.csv nằm tại /home/phat/Downloads/ElonMusk_tweets.csv. Upload file lên HDFS với tài khoản hdoop bằng lệnh:
+Giả sử file dữ liệu ElonMusk_tweets.csv đã được lưu tại /mnt/data/ElonMusk_tweets.csv. Từ tài khoản hdoop, upload file lên HDFS bằng các lệnh sau:
 
 ```bash
 hdfs dfs -mkdir -p /user/hdoop/data
-hdfs dfs -copyFromLocal /home/phat/Downloads/ElonMusk_tweets.csv /user/hdoop/data
+hdfs dfs -copyFromLocal /mnt/data/ElonMusk_tweets.csv /user/hdoop/data 3. Chạy các job MapReduce
 ```
 
-3. Chạy các job MapReduce
+Bạn có thể kiểm tra xem file ElonMusk_tweets.csv đã được chuyển vào HDFS chưa bằng lệnh:
 
-3.1 Đếm số tweet theo ngày
+```bash
+hdfs dfs -ls /user/hdoop/data
+```
+
+3.1. Đếm số tweet theo ngày
 Chạy job MapReduce với lệnh:
 
 ```bash
@@ -182,13 +179,13 @@ hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-\*.jar \
  -reducer reducer_date.py
 ```
 
-Sau khi job hoàn tất, xem kết quả:
+Sau khi job hoàn tất, xem kết quả bằng lệnh:
 
 ```bash
 hdfs dfs -cat /user/hdoop/data/tweet_count_by_date/part-\*
 ```
 
-3.2 Đếm số tweet theo khung giờ
+3.2. Đếm số tweet theo khung giờ
 Chạy job MapReduce với lệnh:
 
 ```bash
@@ -199,11 +196,14 @@ hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-\*.jar \
  -reducer reducer_hour.py
 ```
 
-Xem kết quả:
+Xem kết quả bằng lệnh:
 
 ```bash
 hdfs dfs -cat /user/hdoop/data/tweet_count_by_hour/part-\*
 ```
+
+4. Dừng Hadoop
+   Sau khi hoàn tất công việc, dừng Hadoop bằng lệnh:
 
 ```bash
 stop-all.sh
