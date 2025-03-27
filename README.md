@@ -153,8 +153,10 @@ Lưu file.
 Chạy lệnh sau để cấp quyền thực thi:
 
 ```bash
-chmod +x mapper_date.py reducer_date.py mapper_hour.py reducer_hour.py 2. Upload dữ liệu lên HDFS
+chmod +x mapper_date.py reducer_date.py mapper_hour.py reducer_hour.py
 ```
+
+2. Upload dữ liệu lên HDFS
 
 Giả sử file dữ liệu ElonMusk_tweets.csv đã được lưu tại /mnt/data/ElonMusk_tweets.csv. Từ tài khoản hdoop, upload file lên HDFS bằng các lệnh sau:
 
