@@ -47,8 +47,9 @@ if len(fields) < 4:
 continue
 date = fields[1] # Trường thứ 2 là ngày
 print(f"{date}\t1")
-Lưu file bằng cách nhấn Ctrl+X, sau đó nhấn Y rồi Enter.
 ```
+
+Lưu file bằng cách nhấn Ctrl+X, sau đó nhấn Y rồi Enter.
 
 1.2. Tạo file reducer_date.py
 
