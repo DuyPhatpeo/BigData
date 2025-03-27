@@ -162,8 +162,13 @@ Giả sử file dữ liệu ElonMusk_tweets.csv đã được lưu tại /mnt/da
 
 ```bash
 hdfs dfs -mkdir -p /user/hdoop/data
-hdfs dfs -copyFromLocal /mnt/data/ElonMusk_tweets.csv /user/hdoop/data 3. Chạy các job MapReduce
 ```
+
+```bash
+hdfs dfs -copyFromLocal /home/phat/Downloads/ElonMusk_tweets.csv /user/hdoop/data
+```
+
+3. Chạy các job MapReduce
 
 Bạn có thể kiểm tra xem file ElonMusk_tweets.csv đã được chuyển vào HDFS chưa bằng lệnh:
 
