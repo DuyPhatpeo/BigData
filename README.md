@@ -284,5 +284,3 @@ Trong terminal, chạy lệnh:
 ```bash
 spark-submit tweet_analysis.py
 ```
-
-Kết quả sẽ được trực quan hóa bằng biểu đồ và các file ảnh tweet_count_by_date.png và tweet_count_by_hour.png sẽ được lưu trong thư mục làm việc.
