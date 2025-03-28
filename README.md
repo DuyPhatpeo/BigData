@@ -202,20 +202,12 @@ hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-3.2.2.jar \
 ```
 
 ```
-hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-*.jar \
+hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-3.2.2.jar \
+  -file mapper_hour.py -mapper mapper_hour.py \
+  -file reducer_hour.py -reducer reducer_hour.py \
   -input /user/hdoop/data/ElonMusk_tweets.csv \
-  -output /user/hdoop/data/tweet_count_by_date \
-  -mapper /home/hdoop/tweet/mapper_date.py \
-  -reducer /home/hdoop/tweet/reducer_date.py
-```
+  -output /user/hdoop/data/tweet_count_by_hour
 
-```
-hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-*.jar \
-  -files /home/hdoop/tweet/mapper_date.py,/home/hdoop/tweet/reducer_date.py \
-  -mapper mapper_date.py \
-  -reducer reducer_date.py \
-  -input /user/hdoop/data/ElonMusk_tweets.csv \
-  -output /user/hdoop/data/tweet_count_by_date
 ```
 
 Sau khi job hoàn tất, xem kết quả bằng lệnh:
