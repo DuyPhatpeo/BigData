@@ -157,18 +157,24 @@ chmod +x mapper_date.py reducer_date.py mapper_hour.py reducer_hour.py
 ```
 
 2. Upload dữ liệu lên HDFS
+   Chạy Hadoop
+   Sau khi hoàn tất công việc, dừng Hadoop bằng lệnh:
+
+```bash
+start-all.sh
+```
 
 Giả sử file dữ liệu ElonMusk_tweets.csv đã được lưu tại /mnt/data/ElonMusk_tweets.csv. Từ tài khoản hdoop, upload file lên HDFS bằng các lệnh sau:
 
 ```bash
-hdfs dfs -mkdir -p /user/hdoop/data
+hdfs dfs -mkdir -p data
 ```
 
 ```bash
-hdfs dfs -copyFromLocal /home/phat/Downloads/ElonMusk_tweets.csv /user/hdoop/data
+hdfs dfs -copyFromLocal /home/phat/Downloads/tweet /user/hdoop/data
 ```
 
-3. Chạy các job MapReduce
+1. Chạy các job MapReduce
 
 Bạn có thể kiểm tra xem file ElonMusk_tweets.csv đã được chuyển vào HDFS chưa bằng lệnh:
 
@@ -180,11 +186,12 @@ hdfs dfs -ls /user/hdoop/data
 Chạy job MapReduce với lệnh:
 
 ```bash
-hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-\*.jar \
+hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-3.2.2.jar \
  -input /user/hdoop/data/ElonMusk_tweets.csv \
  -output /user/hdoop/data/tweet_count_by_date \
  -mapper mapper_date.py \
  -reducer reducer_date.py
+
 ```
 
 Sau khi job hoàn tất, xem kết quả bằng lệnh:
@@ -197,7 +204,7 @@ hdfs dfs -cat /user/hdoop/data/tweet_count_by_date/part-\*
 Chạy job MapReduce với lệnh:
 
 ```bash
-hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-\*.jar \
+hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-3.2.2.jar \
  -input /user/hdoop/data/ElonMusk_tweets.csv \
  -output /user/hdoop/data/tweet_count_by_hour \
  -mapper mapper_hour.py \
