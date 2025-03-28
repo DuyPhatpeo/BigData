@@ -36,17 +36,18 @@ nano mapper_date.py
 Dán nội dung sau:
 
 ```bash
+#!/usr/bin/env python3
 import sys
 
 for line in sys.stdin:
-line = line.strip()
-if not line:
-continue
-fields = line.split() # Dữ liệu có ít nhất 4 trường: id, date, time, text
-if len(fields) < 4:
-continue
-date = fields[1] # Trường thứ 2 là ngày
-print(f"{date}\t1")
+    line = line.strip()
+    if not line:
+        continue
+    fields = line.split()  # Giả sử file có ít nhất 4 trường: id, date, time, text
+    if len(fields) < 4:
+        continue
+    date = fields[1]  # Trường thứ 2 là ngày
+    print(f"{date}\t1")
 ```
 
 Lưu file bằng cách nhấn Ctrl+X, sau đó nhấn Y rồi Enter.
@@ -61,17 +62,18 @@ nano reducer_date.py
 Dán nội dung sau:
 
 ```bash
+#!/usr/bin/env python3
 import sys
 
 current_date = None
 count = 0
 
 for line in sys.stdin:
-line = line.strip()
-if not line:
-continue
-date, value = line.split("\t")
-value = int(value)
+    line = line.strip()
+    if not line:
+        continue
+    date, value = line.split("\t")
+    value = int(value)
 
     if current_date == date:
         count += value
@@ -82,7 +84,8 @@ value = int(value)
         count = value
 
 if current_date is not None:
-print(f"{current_date}\t{count}")
+    print(f"{current_date}\t{count}")
+
 ```
 
 Lưu file.
@@ -97,18 +100,20 @@ nano mapper_hour.py
 Dán nội dung sau (chú ý indent đúng):
 
 ```bash
+#!/usr/bin/env python3
 import sys
 
 for line in sys.stdin:
-line = line.strip()
-if not line:
-continue
-fields = line.split()
-if len(fields) < 4:
-continue
-time_field = fields[2] # Trường thứ 3 là thời gian (HH:MM:SS)
-hour = time_field.split(":")[0]
-print(f"{hour}\t1")
+    line = line.strip()
+    if not line:
+        continue
+    fields = line.split()
+    if len(fields) < 4:
+        continue
+    time_field = fields[2]  # Trường thứ 3 là thời gian (HH:MM:SS)
+    hour = time_field.split(":")[0]
+    print(f"{hour}\t1")
+
 ```
 
 Lưu file.
@@ -123,17 +128,18 @@ nano reducer_hour.py
 Dán nội dung sau (chú ý indent đúng):
 
 ```bash
+#!/usr/bin/env python3
 import sys
 
 current_hour = None
 count = 0
 
 for line in sys.stdin:
-line = line.strip()
-if not line:
-continue
-hour, value = line.split("\t")
-value = int(value)
+    line = line.strip()
+    if not line:
+        continue
+    hour, value = line.split("\t")
+    value = int(value)
 
     if current_hour == hour:
         count += value
@@ -144,7 +150,8 @@ value = int(value)
         count = value
 
 if current_hour is not None:
-print(f"{current_hour}:00 - {current_hour}:59\t{count}")
+    print(f"{current_hour}:00 - {current_hour}:59\t{count}")
+
 ```
 
 Lưu file.
