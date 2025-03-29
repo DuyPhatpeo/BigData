@@ -96,7 +96,7 @@ for line in sys.stdin:
     try:
         row = next(csv.reader([line]))  # Đọc dòng CSV
         tweet_id, created_at, text = row
-        hour = created_at[12:14]  # Lấy giờ từ created_at (YYYY-MM-DD HH:MM:SS)
+        hour = created_at[11:13]  # Lấy giờ từ created_at (YYYY-MM-DD HH:MM:SS)
         print(f"{hour}\t1")  # Output: (hour, 1)
     except Exception:
         continue  # Bỏ qua dòng lỗi
@@ -125,15 +125,8 @@ for line in sys.stdin:
     hour, count = line.strip().split("\t")
     tweet_count[hour] += int(count)
 
-# Tìm giờ có nhiều tweet nhất
-max_hour = max(tweet_count, key=tweet_count.get)
-max_count = tweet_count[max_hour]
-
 for hour in sorted(tweet_count):
     print(f"{hour}\t{tweet_count[hour]}")
-
-print(f"\nElon Musk thường đăng tweet nhiều nhất vào khoảng {max_hour}h với {max_count} tweet.")
-
 
 ```
 
