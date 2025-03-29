@@ -181,21 +181,12 @@ hdfs dfs -ls /user/hdoop/data
 3.1. Đếm số tweet theo ngày
 Chạy job MapReduce với lệnh:
 
-```bash
-hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-3.2.2.jar \
- -input /user/hdoop/data/ElonMusk_tweets.csv \
- -output /user/hdoop/data/tweet_count_by_date \
- -mapper mapper_date.py \
- -reducer reducer_date.py
-
-```
-
 ```
 hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-3.2.2.jar \
-  -file mapper_hour.py -mapper mapper_hour.py \
-  -file reducer_hour.py -reducer reducer_hour.py \
-  -input /user/hdoop/data/ElonMusk_tweets.csv \
-  -output /user/hdoop/data/tweet_count_by_hour
+  -file mapper_date.py -mapper mapper_date.py \
+  -file reducer_date.py -reducer reducer_date.py \
+  -input /user/hdoop/data/tweet \
+  -output /user/hdoop/data/tweet_count_by_date
 
 ```
 
