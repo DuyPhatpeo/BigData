@@ -36,7 +36,7 @@ nano mapper_date.py
 Dán nội dung sau:
 
 ```bash
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import sys
 import csv
 
@@ -62,7 +62,7 @@ nano reducer_date.py
 Dán nội dung sau:
 
 ```bash
-#!usr/bin/env python3
+#!usr/bin/python3
 import sys
 from collections import defaultdict
 
@@ -88,7 +88,7 @@ nano mapper_hour.py
 Dán nội dung sau (chú ý indent đúng):
 
 ```bash
-#!usr/bin/python3
+#!/usr/bin/python3
 import sys
 import csv
 
@@ -96,10 +96,8 @@ for line in sys.stdin:
     try:
         row = next(csv.reader([line]))  # Đọc dòng CSV
         tweet_id, created_at, text = row
-        # Lấy giờ từ created_at (YYYY-MM-DD HH:MM:SS)
-        time_part = created_at.split()[1]
-        hour = time_part.split(":")[0]
-        print(f"{hour}\t1")
+        hour = created_at[11:13]  # Lấy giờ từ created_at (YYYY-MM-DD HH:MM:SS)
+        print(f"{hour}\t1")  # Output: (hour, 1)
     except Exception:
         continue  # Bỏ qua dòng lỗi
 
@@ -117,29 +115,21 @@ nano reducer_hour.py
 Dán nội dung sau (chú ý indent đúng):
 
 ```bash
-#!usr/bin/env python3
+#!/usr/bin/env python3
 import sys
+from collections import defaultdict
 
-current_hour = None
-count = 0
+tweet_count = defaultdict(int)
 
 for line in sys.stdin:
-    line = line.strip()
-    if not line:
-        continue
-    hour, value = line.split("\t")
-    value = int(value)
+    hour, count = line.strip().split("\t")
+    tweet_count[hour] += int(count)
 
-    if current_hour == hour:
-        count += value
-    else:
-        if current_hour is not None:
-            print(f"{current_hour}:00 - {current_hour}:59\t{count}")
-        current_hour = hour
-        count = value
+# Tìm giờ có số tweet nhiều nhất
+max_hour = max(tweet_count, key=tweet_count.get)
+max_count = tweet_count[max_hour]
 
-if current_hour is not None:
-    print(f"{current_hour}:00 - {current_hour}:59\t{count}")
+print(f"Giờ có nhiều tweet nhất: {max_hour} với {max_count} tweet")
 
 ```
 
@@ -201,10 +191,10 @@ Chạy job MapReduce với lệnh:
 
 ```bash
 hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-3.2.2.jar \
- -input /user/hdoop/data/ElonMusk_tweets.csv \
- -output /user/hdoop/data/tweet_count_by_hour \
- -mapper mapper_hour.py \
- -reducer reducer_hour.py
+  -file mapper_hour.py -mapper mapper_hour.py \
+  -file reducer_hour.py -reducer reducer_hour.py \
+  -input /user/hdoop/data/tweet \
+  -output /user/hdoop/data/tweet_count_by_hour
 ```
 
 Xem kết quả bằng lệnh:
