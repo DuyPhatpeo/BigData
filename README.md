@@ -36,7 +36,7 @@ nano mapper_date.py
 Dán nội dung sau:
 
 ```bash
-#!usr/bin/python3
+#!/usr/bin/env python3
 import sys
 import csv
 
@@ -44,12 +44,10 @@ for line in sys.stdin:
     try:
         row = next(csv.reader([line]))  # Đọc dòng CSV
         tweet_id, created_at, text = row
-        # Lấy ngày từ created_at (YYYY-MM-DD HH:MM:SS)
-        day = created_at.split()[0]
-        print(f"{day}\t1")
-    except Exception:
+        date = created_at[:10]  # Lấy năm từ created_at (YYYY-MM-DD HH:MM:SS)
+        print(f"{date}\t1")  # Output: (date, 1)
+    except Exception as e:
         continue  # Bỏ qua dòng lỗi
-
 ```
 
 Lưu file bằng cách nhấn Ctrl+X, sau đó nhấn Y rồi Enter.
