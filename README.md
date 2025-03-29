@@ -36,18 +36,20 @@ nano mapper_date.py
 Dán nội dung sau:
 
 ```bash
-#!usr/bin/env python3
+#!usr/bin/python3
 import sys
+import csv
 
 for line in sys.stdin:
-    line = line.strip()
-    if not line:
-        continue
-    fields = line.split()  # Giả sử file có ít nhất 4 trường: id, date, time, text
-    if len(fields) < 4:
-        continue
-    date = fields[1]  # Trường thứ 2 là ngày
-    print(f"{date}\t1")
+    try:
+        row = next(csv.reader([line]))  # Đọc dòng CSV
+        tweet_id, created_at, text = row
+        # Lấy ngày từ created_at (YYYY-MM-DD HH:MM:SS)
+        day = created_at.split()[0]
+        print(f"{day}\t1")
+    except Exception:
+        continue  # Bỏ qua dòng lỗi
+
 ```
 
 Lưu file bằng cách nhấn Ctrl+X, sau đó nhấn Y rồi Enter.
@@ -100,19 +102,20 @@ nano mapper_hour.py
 Dán nội dung sau (chú ý indent đúng):
 
 ```bash
-#!usr/bin/env python3
+#!usr/bin/python3
 import sys
+import csv
 
 for line in sys.stdin:
-    line = line.strip()
-    if not line:
-        continue
-    fields = line.split()
-    if len(fields) < 4:
-        continue
-    time_field = fields[2]  # Trường thứ 3 là thời gian (HH:MM:SS)
-    hour = time_field.split(":")[0]
-    print(f"{hour}\t1")
+    try:
+        row = next(csv.reader([line]))  # Đọc dòng CSV
+        tweet_id, created_at, text = row
+        # Lấy giờ từ created_at (YYYY-MM-DD HH:MM:SS)
+        time_part = created_at.split()[1]
+        hour = time_part.split(":")[0]
+        print(f"{hour}\t1")
+    except Exception:
+        continue  # Bỏ qua dòng lỗi
 
 ```
 
