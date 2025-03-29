@@ -168,6 +168,12 @@ Bạn có thể kiểm tra xem file ElonMusk_tweets.csv đã được chuyển v
 hdfs dfs -ls /user/hdoop/data
 ```
 
+xoa file
+
+```
+hdfs dfs -rm -r /user/hdoop/data/tweet_count_by_hour
+```
+
 3.1. Đếm số tweet theo ngày
 Chạy job MapReduce với lệnh:
 
