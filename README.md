@@ -288,3 +288,49 @@ Trong terminal, chạy lệnh:
 ```bash
 spark-submit tweet_analysis.py
 ```
+
+Cai Spark
+
+1. Tải và giải nén Spark
+   Tải phiên bản Spark 3.5.5:
+
+```bash
+wget https://dlcdn.apache.org/spark/spark-3.5.5/spark-3.5.5-bin-hadoop3.tgz
+```
+
+Giải nén:
+
+```bash
+tar xvf spark-3.5.5-bin-hadoop3.tgz
+```
+
+Di chuyển thư mục Spark:
+
+```bash
+sudo mv spark-3.5.5-bin-hadoop3 /opt/spark
+```
+
+2. Thiết lập biến môi trường
+   Mở file ~/.bashrc và thêm các dòng sau:
+
+```
+echo "export SPARK_HOME=/opt/spark" >> ~/.bashrc
+echo "export PATH=$SPARK_HOME/bin:$SPARK_HOME/sbin:$PATH" >> ~/.bashrc
+echo "export PYSPARK_PYTHON=python3" >> ~/.bashrc
+```
+
+Nạp lại cấu hình:
+
+```bash
+source ~/.bashrc
+```
+
+3. Khởi động PySpark
+
+```
+pyspark
+```
+
+```
+
+```
